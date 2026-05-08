@@ -1,0 +1,167 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Audience {
+  doctor
+  patient
+  both
+}
+
+enum ArticleStatus {
+  draft
+  published
+  archived
+}
+
+enum AdminRole {
+  super_admin
+  editor
+  viewer
+}
+
+enum MediaType {
+  image
+  video_link
+  attachment
+}
+
+model AdminUser {
+  id           String    @id @default(uuid())
+  name         String
+  email        String    @unique
+  passwordHash String    @map("password_hash")
+  role         AdminRole @default(editor)
+  articles     Article[]
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+
+  @@map("admin_users")
+}
+
+model Category {
+  id          String     @id @default(uuid())
+  parentId    String?    @map("parent_id")
+  parent      Category?  @relation("CategoryHierarchy", fields: [parentId], references: [id])
+  children    Category[] @relation("CategoryHierarchy")
+  slug        String     @unique
+  name        String
+  description String?
+  icon        String?
+  audience    Audience   @default(both)
+  orderIndex  Int        @default(0) @map("order_index")
+  isActive    Boolean    @default(true) @map("is_active")
+  articles    Article[]
+  createdAt   DateTime   @default(now()) @map("created_at")
+  updatedAt   DateTime   @updatedAt @map("updated_at")
+
+  @@map("categories")
+}
+
+model Article {
+  id             String            @id @default(uuid())
+  categoryId     String?           @map("category_id")
+  category       Category?         @relation(fields: [categoryId], references: [id])
+  authorId       String?           @map("author_id")
+  author         AdminUser?        @relation(fields: [authorId], references: [id])
+  slug           String            @unique
+  title          String
+  summary        String?
+  content        String
+  steps          Json?
+  audience       Audience          @default(both)
+  status         ArticleStatus     @default(draft)
+  isFeatured     Boolean           @default(false) @map("is_featured")
+  isPinned       Boolean           @default(false) @map("is_pinned")
+  viewCount      Int               @default(0) @map("view_count")
+  helpfulYes     Int               @default(0) @map("helpful_yes")
+  helpfulNo      Int               @default(0) @map("helpful_no")
+  seoTitle       String?           @map("seo_title")
+  seoDescription String?           @map("seo_description")
+  publishedAt    DateTime?         @map("published_at")
+  archivedAt     DateTime?         @map("archived_at")
+  tags           ArticleTag[]
+  media          ArticleMedia[]
+  relatedFrom    ArticleRelated[]  @relation("ArticleRelatedFrom")
+  relatedTo      ArticleRelated[]  @relation("ArticleRelatedTo")
+  feedback       ArticleFeedback[]
+  createdAt      DateTime          @default(now()) @map("created_at")
+  updatedAt      DateTime          @updatedAt @map("updated_at")
+
+  @@map("articles")
+}
+
+model Tag {
+  id        String       @id @default(uuid())
+  slug      String       @unique
+  name      String
+  articles  ArticleTag[]
+  createdAt DateTime     @default(now()) @map("created_at")
+
+  @@map("tags")
+}
+
+model ArticleTag {
+  articleId String  @map("article_id")
+  tagId     String  @map("tag_id")
+  article   Article @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  tag       Tag     @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([articleId, tagId])
+  @@map("article_tags")
+}
+
+model ArticleMedia {
+  id         String    @id @default(uuid())
+  articleId  String    @map("article_id")
+  article    Article   @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  type       MediaType
+  url        String
+  caption    String?
+  position   String    @default("after_content")
+  orderIndex Int       @default(0) @map("order_index")
+  createdAt  DateTime  @default(now()) @map("created_at")
+
+  @@map("article_media")
+}
+
+model ArticleRelated {
+  articleId        String  @map("article_id")
+  relatedArticleId String  @map("related_article_id")
+  orderIndex       Int     @default(0) @map("order_index")
+  article          Article @relation("ArticleRelatedFrom", fields: [articleId], references: [id], onDelete: Cascade)
+  relatedArticle   Article @relation("ArticleRelatedTo", fields: [relatedArticleId], references: [id], onDelete: Cascade)
+
+  @@id([articleId, relatedArticleId])
+  @@map("article_related")
+}
+
+model ArticleFeedback {
+  id        String   @id @default(uuid())
+  articleId String   @map("article_id")
+  article   Article  @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  sessionId String?  @map("session_id")
+  isHelpful Boolean  @map("is_helpful")
+  comment   String?
+  userAgent String?  @map("user_agent")
+  ipHash    String?  @map("ip_hash")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("article_feedback")
+}
+
+model SearchLog {
+  id               String   @id @default(uuid())
+  query            String
+  audience         String?
+  resultsCount     Int      @default(0) @map("results_count")
+  clickedArticleId String?  @map("clicked_article_id")
+  sessionId        String?  @map("session_id")
+  createdAt        DateTime @default(now()) @map("created_at")
+
+  @@map("search_logs")
+}
