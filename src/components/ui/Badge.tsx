@@ -9,13 +9,13 @@ interface BadgeProps {
 }
 
 const variants = {
-  default: "bg-gray-100 text-gray-700",
-  doctor: "bg-blue-100 text-blue-700",
-  patient: "bg-green-100 text-green-700",
-  both: "bg-purple-100 text-purple-700",
-  draft: "bg-yellow-100 text-yellow-700",
-  published: "bg-green-100 text-green-700",
-  archived: "bg-gray-100 text-gray-500",
+  default: "bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-200",
+  doctor: "bg-indigo-50 text-indigo-700 ring-1 ring-inset ring-indigo-200",
+  patient: "bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-200",
+  both: "bg-violet-50 text-violet-700 ring-1 ring-inset ring-violet-200",
+  draft: "bg-amber-50 text-amber-700 ring-1 ring-inset ring-amber-200",
+  published: "bg-green-50 text-green-700 ring-1 ring-inset ring-green-200",
+  archived: "bg-slate-100 text-slate-600 ring-1 ring-inset ring-slate-200",
 };
 
 const labels: Record<string, string> = {

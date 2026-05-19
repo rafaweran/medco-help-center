@@ -11,6 +11,7 @@ interface SearchBarProps {
   placeholder?: string;
   size?: "sm" | "lg";
   className?: string;
+  suggestions?: string[];
 }
 
 export function SearchBar({
@@ -19,50 +20,90 @@ export function SearchBar({
   placeholder = "Buscar artigos, dúvidas, tutoriais...",
   size = "lg",
   className,
+  suggestions,
 }: SearchBarProps) {
   const router = useRouter();
   const [query, setQuery] = useState(defaultValue);
 
-  const handleSubmit = useCallback(
-    (e: React.FormEvent) => {
-      e.preventDefault();
-      if (!query.trim()) return;
-      const params = new URLSearchParams({ q: query.trim() });
+  const navigate = useCallback(
+    (term: string) => {
+      if (!term.trim()) return;
+      const params = new URLSearchParams({ q: term.trim() });
       if (audience) params.set("audience", audience);
       router.push(`/busca?${params.toString()}`);
     },
-    [query, audience, router]
+    [audience, router]
+  );
+
+  const handleSubmit = useCallback(
+    (e: React.FormEvent) => {
+      e.preventDefault();
+      navigate(query);
+    },
+    [query, navigate]
   );
 
   return (
-    <form onSubmit={handleSubmit} className={cn("w-full", className)}>
-      <div className="relative flex items-center">
-        <Search
-          className={cn(
-            "absolute left-4 text-gray-400 pointer-events-none",
-            size === "lg" ? "w-5 h-5" : "w-4 h-4"
-          )}
-        />
-        <input
-          type="text"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder={placeholder}
-          className={cn(
-            "w-full rounded-xl border border-gray-200 bg-white pl-12 pr-32 text-gray-900 placeholder-gray-400 shadow-sm transition-shadow focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent",
-            size === "lg" ? "h-14 text-base" : "h-10 text-sm pr-24"
-          )}
-        />
-        <button
-          type="submit"
-          className={cn(
-            "absolute right-2 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2",
-            size === "lg" ? "px-5 py-2.5 text-sm" : "px-4 py-1.5 text-xs"
-          )}
-        >
-          Buscar
-        </button>
-      </div>
-    </form>
+    <div className={cn("w-full", className)}>
+      <form onSubmit={handleSubmit}>
+        <div className="relative flex items-center">
+          <Search
+            className={cn(
+              "absolute left-4 text-gray-400 pointer-events-none",
+              size === "lg" ? "w-5 h-5" : "w-4 h-4"
+            )}
+          />
+          <input
+            type="text"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder={placeholder}
+            className={cn(
+              "w-full rounded-xl border border-gray-200 bg-white pl-12 pr-32 text-gray-900 placeholder-gray-400 shadow-sm transition-shadow focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent",
+              size === "lg" ? "h-14 text-base" : "h-10 text-sm pr-24"
+            )}
+          />
+          <button
+            type="submit"
+            className={cn(
+              "absolute right-2 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2",
+              size === "lg" ? "px-5 py-2.5 text-sm" : "px-4 py-1.5 text-xs"
+            )}
+          >
+            Buscar
+          </button>
+        </div>
+      </form>
+
+      {/* Quick-search chips */}
+      {suggestions && suggestions.length > 0 && (
+        <div className="flex items-center gap-2 mt-3 flex-wrap justify-center">
+          <span className="text-xs" style={{ color: "rgba(255,255,255,0.55)" }}>
+            Popular:
+          </span>
+          {suggestions.map((s) => (
+            <button
+              key={s}
+              type="button"
+              onClick={() => navigate(s)}
+              className="text-xs rounded-full px-3 py-1 transition-colors"
+              style={{
+                background: "rgba(255,255,255,0.15)",
+                color: "rgba(255,255,255,0.9)",
+                border: "1px solid rgba(255,255,255,0.25)",
+              }}
+              onMouseEnter={(e) =>
+                (e.currentTarget.style.background = "rgba(255,255,255,0.25)")
+              }
+              onMouseLeave={(e) =>
+                (e.currentTarget.style.background = "rgba(255,255,255,0.15)")
+              }
+            >
+              {s}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
   );
 }

@@ -9,80 +9,94 @@ async function main() {
   console.log("Seeding database...");
 
   // Categories
-  const categories = await Promise.all([
-    prisma.category.upsert({
-      where: { slug: "primeiros-passos" },
-      update: {},
-      create: {
-        slug: "primeiros-passos",
-        name: "Primeiros passos",
-        description: "Tudo para começar a usar a plataforma Med.co",
-        icon: "book",
-        audience: "both",
-        orderIndex: 0,
-      },
-    }),
-    prisma.category.upsert({
-      where: { slug: "teleorientacao" },
-      update: {},
-      create: {
-        slug: "teleorientacao",
-        name: "Teleorientação",
-        description: "Dúvidas sobre consultas online e teleconsulta",
-        icon: "stethoscope",
-        audience: "both",
-        orderIndex: 1,
-      },
-    }),
-    prisma.category.upsert({
-      where: { slug: "telemonitoramento" },
-      update: {},
-      create: {
-        slug: "telemonitoramento",
-        name: "Telemonitoramento",
-        description: "Acompanhamento de saúde à distância",
-        icon: "stethoscope",
-        audience: "both",
-        orderIndex: 2,
-      },
-    }),
-    prisma.category.upsert({
-      where: { slug: "conta-e-perfil" },
-      update: {},
-      create: {
-        slug: "conta-e-perfil",
-        name: "Conta e perfil",
-        description: "Configurações da sua conta na Med.co",
-        icon: "user",
-        audience: "both",
-        orderIndex: 3,
-      },
-    }),
-    prisma.category.upsert({
-      where: { slug: "para-medicos" },
-      update: {},
-      create: {
-        slug: "para-medicos",
-        name: "Para médicos",
-        description: "Recursos exclusivos para profissionais de saúde",
-        icon: "stethoscope",
-        audience: "doctor",
-        orderIndex: 4,
-      },
-    }),
-    prisma.category.upsert({
-      where: { slug: "para-pacientes" },
-      update: {},
-      create: {
-        slug: "para-pacientes",
-        name: "Para pacientes",
-        description: "Tudo que você precisa saber como paciente",
-        icon: "user",
-        audience: "patient",
-        orderIndex: 5,
-      },
-    }),
-  ]);
+  const categorySeed = [
+    {
+      slug: "comecar-na-medco",
+      name: "Começar na Med.co",
+      description: "Crie sua conta, entenda como funciona e dê os primeiros passos.",
+      icon: "book",
+      audience: "both" as const,
+      orderIndex: 0,
+    },
+    {
+      slug: "minha-conta-e-perfil",
+      name: "Minha conta e perfil",
+      description: "Atualize seus dados, senha, documentos e configurações da conta.",
+      icon: "user",
+      audience: "both" as const,
+      orderIndex: 1,
+    },
+    {
+      slug: "conectar-com-medico-paciente",
+      name: "Conectar com médico/paciente",
+      description: "Encontre, conecte e gerencie seus vínculos dentro da plataforma.",
+      icon: "user",
+      audience: "both" as const,
+      orderIndex: 2,
+    },
+    {
+      slug: "teleorientacao",
+      name: "Teleorientação",
+      description: "Atendimento rápido com pagamento e resposta do médico.",
+      icon: "stethoscope",
+      audience: "both" as const,
+      orderIndex: 3,
+    },
+    {
+      slug: "telemonitoramento",
+      name: "Telemonitoramento",
+      description: "Acompanhamento contínuo após consulta com seu médico.",
+      icon: "stethoscope",
+      audience: "both" as const,
+      orderIndex: 4,
+    },
+    {
+      slug: "pagamentos-e-financeiro",
+      name: "Pagamentos e financeiro",
+      description: "Entenda cobranças, repasses, recibos e taxas da plataforma.",
+      icon: "book",
+      audience: "both" as const,
+      orderIndex: 5,
+    },
+    {
+      slug: "exames-e-documentos",
+      name: "Exames e documentos",
+      description: "Envie, visualize e acompanhe seus exames com segurança.",
+      icon: "book",
+      audience: "both" as const,
+      orderIndex: 6,
+    },
+    {
+      slug: "seguranca-e-historico",
+      name: "Segurança e histórico",
+      description: "Suas informações protegidas e histórico de atendimentos.",
+      icon: "book",
+      audience: "both" as const,
+      orderIndex: 7,
+    },
+  ];
+
+  const categories = await Promise.all(
+    categorySeed.map((category) =>
+      prisma.category.upsert({
+        where: { slug: category.slug },
+        update: {
+          name: category.name,
+          description: category.description,
+          icon: category.icon,
+          audience: category.audience,
+          orderIndex: category.orderIndex,
+          isActive: true,
+        },
+        create: category,
+      })
+    )
+  );
+
+  await prisma.category.updateMany({
+    where: { slug: { notIn: categorySeed.map((c) => c.slug) } },
+    data: { isActive: false },
+  });
 
   // Tags
   const tagData = [
@@ -153,7 +167,7 @@ async function main() {
       audience: "both" as const,
       status: "published" as const,
       isFeatured: true,
-      categoryId: catMap["primeiros-passos"],
+      categoryId: catMap["comecar-na-medco"],
       tagIds: [tagMap["conta"]],
       viewCount: 980,
       helpfulYes: 72,
@@ -196,7 +210,7 @@ async function main() {
       audience: "doctor" as const,
       status: "published" as const,
       isFeatured: false,
-      categoryId: catMap["para-medicos"],
+      categoryId: catMap["conectar-com-medico-paciente"],
       tagIds: [tagMap["agendamento"], tagMap["medico"]],
       viewCount: 420,
       helpfulYes: 38,
@@ -217,7 +231,7 @@ async function main() {
       audience: "both" as const,
       status: "published" as const,
       isFeatured: false,
-      categoryId: catMap["conta-e-perfil"],
+      categoryId: catMap["minha-conta-e-perfil"],
       tagIds: [tagMap["conta"]],
       viewCount: 312,
       helpfulYes: 28,

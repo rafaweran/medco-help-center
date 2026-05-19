@@ -20,14 +20,14 @@ export function ArticleCard({ article, showAudience = false, compact = false }: 
     <Link
       href={`/artigo/${article.slug}`}
       className={cn(
-        "group flex items-start gap-3 rounded-xl border border-gray-100 bg-white p-4 hover:border-blue-200 hover:shadow-md transition-all",
-        compact ? "py-3" : "p-4"
+        "group flex items-start gap-3 rounded-xl border border-gray-100 bg-white hover:border-gray-200 hover:shadow-sm transition-all",
+        compact ? "p-3" : "p-4"
       )}
     >
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 mb-1 flex-wrap">
           {article.isFeatured && (
-            <span className="text-xs font-medium text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full">
+            <span className="text-xs text-amber-700 bg-amber-50 ring-1 ring-inset ring-amber-200 px-2 py-0.5 rounded-full">
               Destaque
             </span>
           )}
@@ -37,7 +37,9 @@ export function ArticleCard({ article, showAudience = false, compact = false }: 
             </Badge>
           )}
           {article.category && (
-            <span className="text-xs text-gray-400">{article.category.name}</span>
+            <span className="text-xs text-blue-700 bg-blue-50 ring-1 ring-inset ring-blue-200 px-2 py-0.5 rounded-full">
+              {article.category.name}
+            </span>
           )}
         </div>
 

@@ -12,15 +12,25 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Force readable article content even when rich-text HTML brings inline colors. */
+.article-content {
+  color: #1f2937;
+}
+
+.article-content :where(h1, h2, h3, h4, h5, h6) {
+  color: #111827 !important;
+}
+
+.article-content :where(p, li, span, strong, em) {
+  color: #1f2937 !important;
+}
+
+.article-content a {
+  color: #1d4ed8 !important;
 }
