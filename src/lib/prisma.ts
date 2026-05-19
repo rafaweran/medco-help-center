@@ -2,7 +2,12 @@ import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 
 function createPrismaClient() {
-  const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL! });
+  const url = process.env.DATABASE_URL!;
+  const isRemote = url.includes("supabase.co") || url.includes("neon.tech");
+  const adapter = new PrismaPg({
+    connectionString: url,
+    ...(isRemote && { ssl: { rejectUnauthorized: false } }),
+  });
   return new PrismaClient({ adapter });
 }
 
